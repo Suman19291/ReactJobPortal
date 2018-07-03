@@ -15,6 +15,7 @@ import ChevronRightIcon from '@material-ui/icons/ChevronRight';
 import { mailFolderListItems, otherMailFolderListItems } from './tileData';
 import JobCard from './JobCard';
 import JobDetail from './JobDetails';
+import axios from 'axios';
 
 const drawerWidth = 240;
 
@@ -84,9 +85,14 @@ const styles = theme => ({
 });
 
 class MiniDrawer extends React.Component {
-  state = {
-    open: false,
-  };
+  
+  constructor() {
+    super();
+    this.state = {
+        open: false,
+        jobsData: [],
+      };
+  }
 
   handleDrawerOpen = () => {
     this.setState({ open: true });
@@ -96,10 +102,32 @@ class MiniDrawer extends React.Component {
     this.setState({ open: false });
   };
 
+  componentDidMount() {
+      var that = this;
+    axios.get('http://localhost:4000/api/v1/getjdsummary', {
+        headers: {
+          'Access-Control-Allow-Origin': '*',
+          'Content-Type': 'application/json',
+        } 
+    })
+    .then(function (response) {
+        console.log(response.data);
+      // handle success
+      that.setState({ jobsData: response.data });
+      //console.log(this.state.jobsData.data);
+    })
+    .catch(function (error) {
+      // handle error
+      console.log(error);
+    })
+    .then(function () {
+      // always executed
+    });
+  }
+
   render() {
     const { classes, theme } = this.props;
-    var jobsData = ['Jake', 'Jon', 'Thruster'];
-    var namesList = jobsData.map(function(name){
+    var namesList = this.state.jobsData.map(function(name){
       return <JobCard jobname="React Developer" jobposition="Analyst" jobdescription ="Should have strong working knowledge in dotnet and related technologies."  minexperience="1"
       maxexperience="4"  joblocation="Chennai"/>;
     })
@@ -141,7 +169,7 @@ class MiniDrawer extends React.Component {
         <main className={classes.content}>
           <div className={classes.toolbar} />
           {namesList}
-          <JobDetail />
+          
         </main>
       </div>
     );
